@@ -30,7 +30,9 @@ const thoughtSchema = new Schema(
 );
 
 //TODO create reactionCount
-// thoughtSchema.virtual("reactionCount").get(function(){return reactionSchema.length})
+thoughtSchema.virtual("reactionCount").get(function () {
+  return reactions.length;
+});
 
 const Thought = model("thought", thoughtSchema);
 

@@ -129,8 +129,8 @@ connection.once("open", async () => {
     }
     const thoughtIds = results.forEach(getId);
     const thoughtuser = results[0].username;
-    console.log("thoughtuser", thoughtuser);
-    console.log("thoughtId", newThought);
+    // console.log("thoughtuser", thoughtuser);
+    // console.log("thoughtId", newThought);
     users[i].thoughts = newThought;
     const filter = { username: thoughtuser };
     const update = { thoughts: newThought };
@@ -141,7 +141,7 @@ connection.once("open", async () => {
 
   // Log out the seed data to indicate what should appear in the database
   console.table(users);
-  console.log(users[0].thoughts);
+  // console.log(users[0].thoughts);
   console.info("Seeding complete! 🌱");
   process.exit(0);
 });
