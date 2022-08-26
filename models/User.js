@@ -16,10 +16,12 @@ const userSchema = new Schema(
       unique: true,
       max_length: 50,
     },
-    thoughts: {
-      type: Array,
-      default: [],
-    },
+    thoughts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "thought",
+      },
+    ],
     friends: [
       {
         type: Schema.Types.ObjectId,

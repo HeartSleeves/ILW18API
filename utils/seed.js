@@ -1,14 +1,16 @@
 const connection = require("../config/connection");
-const { Reaction, User, Thought } = require("../models");
-const { getRandomName, getRandomArrItem } = require("./data");
+const { User, Thought } = require("../models");
+const {
+  getRandomName,
+  getRandomArrItem,
+  getRandomReaction,
+} = require("./data");
+// const {ObjectId} = require("mongoose").Types;
 
 connection.on("error", (err) => err);
 
 connection.once("open", async () => {
   console.log("connected");
-
-  // Drop existing reactions
-  await Reaction.deleteMany({});
 
   // Drop existing Thoughts
   await Thought.deleteMany({});
@@ -20,11 +22,11 @@ connection.once("open", async () => {
   const users = [];
   const usednames = [];
   const friends = [];
+  const thoughtsarr = [];
 
-  // Loop 20 times -- add users to the friends array
+  // Loop 20 times -- add users to the user array
   for (let i = 0; i < 20; i++) {
     // Get some random assignment objects using a helper function that we imported from ./data
-    // const friends = getRandomName(20);
     let username = getRandomName();
     if (usednames.includes(username)) {
       const num = Math.floor(Math.random() * 90 + 10);
@@ -32,41 +34,30 @@ connection.once("open", async () => {
       usednames.push({ username });
     }
     const email = `${username}@gmail.com`;
-
+    let thoughts = [];
     users.push({
       username,
       email,
-      // thoughts,
+      thoughts,
       friends,
     });
     usednames.push(username);
   }
-  console.log("precreation", users);
   // Add users to the collection and await the results
   await User.collection.insertMany(users);
+  // console.log("postcreation", users);
 
-  // const createdUsers = User.collection.find();
-  // .then(async (users) => {
-  //   const userObj = {
-  //     users,
-  //   };
-  //   return res.json(userObj);
-  // })
-  // .catch((err) => {
-  //   console.log(err);
-  //   return res.status(500).json(err);
-  // });
-  console.log("postcreation", users);
+  // Add users as friends
   for (let i = 0; i < users.length; i++) {
-    console.log("making friend");
+    // console.log("making friend");
     const friend = users[i];
     const friendid = friend._id.toString();
-    console.log("friendid", friendid);
+    // console.log("friendid", friendid);
 
     // console.log("friend", friend);
     const newfriends = [];
     for (let i = 0; i < 6; i++) {
-      const newFriendObject = getRandomArrItem(users, 5);
+      const newFriendObject = getRandomArrItem(users);
       // console.log("newFriendObject", newFriendObject);
       const newFriendId = newFriendObject._id;
       // console.log("newFriendId", newFriendId);
@@ -74,29 +65,83 @@ connection.once("open", async () => {
       // console.log(newfriend);
       newfriends.push({ _id: newfriend });
     }
-    // console.log(newfriends);
-    // await User.collection.update(
-    //   { _id: friendid },
-    //   {
-    //     $set: {
-    //       friends: newfriends,
-    //     },
-    //   }
-    // );
     users[i].friends = newfriends;
     const filter = { _id: users[i]._id };
     const update = { friends: newfriends };
     await User.findOneAndUpdate(filter, update);
   }
+
   // Add reactions to the collection and await the results
-  await Reaction.collection.insertOne({
-    reactionName: "UCLA",
-    inPerson: false,
-    users: [...users],
-  });
+  const reactionsarr = [];
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    const username = user.username;
+    const reactionBody = getRandomReaction();
+    // const reactionId = function () {
+    //   new ObjectId();
+    // };
+    reactionsarr.push({
+      // reactionId,
+      reactionBody,
+      username,
+    });
+  }
+  // await Reaction.collection.insertMany(reactionsarr);
+  // console.log("reactionsarr", reactionsarr[1]);
+
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    const username = user.username;
+    const thoughtText = getRandomReaction();
+    const reactions = [];
+    for (let i = 0; i < 2; i++) {
+      const reaction = getRandomArrItem(reactionsarr);
+      reactions.push(reaction);
+
+      thoughtsarr.push({
+        thoughtText,
+        username,
+        reactions,
+      });
+    }
+  }
+  await Thought.collection.insertMany(thoughtsarr);
+  // console.log("thoughts.length", thoughts.length);
+
+  // Add thoughts to Users;
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i].username;
+    // for (let i = 0; i < thoughts.length; i++) {
+    //   const thought = thoughts[i];
+
+    // }
+    function findUsername(thought) {
+      return thought.username === user;
+    }
+    const results = thoughtsarr.filter(findUsername);
+    // console.log("result", result);
+    const newThought = [];
+    function getId(obj) {
+      let data = obj._id;
+      let objectid = data.toString();
+      let object = { _id: objectid };
+      newThought.push(object);
+    }
+    const thoughtIds = results.forEach(getId);
+    const thoughtuser = results[0].username;
+    console.log("thoughtuser", thoughtuser);
+    console.log("thoughtId", newThought);
+    users[i].thoughts = newThought;
+    const filter = { username: thoughtuser };
+    const update = { thoughts: newThought };
+    // console.log(user);
+    // console.log(thoughtId);
+    await User.findOneAndUpdate(filter, update);
+  }
 
   // Log out the seed data to indicate what should appear in the database
   console.table(users);
+  console.log(users[0].thoughts);
   console.info("Seeding complete! 🌱");
   process.exit(0);
 });
