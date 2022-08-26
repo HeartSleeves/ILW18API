@@ -1,5 +1,5 @@
 {
-  "name": "28-Stu_Mini-Project",
+  "name": "28-stu_mini-project",
   "version": "1.0.1",
   "description": "Mongoose back-end project - Main",
   "main": "index.js",
@@ -16,5 +16,15 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.9"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HeartSleeves/ILW18API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/HeartSleeves/ILW18API/issues"
+  },
+  "homepage": "https://github.com/HeartSleeves/ILW18API#readme"
 }

@@ -1,9 +1,13 @@
-const { Schema, model, mongoose } = require("mongoose");
+const { Schema, model } = require("mongoose");
+const { ObjectId } = require("mongoose").Types;
 
 // Schema to create Reaction model
 const reactionSchema = new Schema(
   {
-    reactionId: mongoose.ObjectId,
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
+    },
     reactionBody: {
       type: String,
       required: true,
@@ -16,6 +20,8 @@ const reactionSchema = new Schema(
     },
     createdAt: {
       type: Date,
+      default: () => Date.now(),
+      //format date with getter
       // same as Thought.js
     },
   },

@@ -1,51 +1,102 @@
-const connection = require('../config/connection');
-const { Course, Student } = require('../models');
-const { getRandomName, getRandomAssignments } = require('./data');
+const connection = require("../config/connection");
+const { Reaction, User, Thought } = require("../models");
+const { getRandomName, getRandomArrItem } = require("./data");
 
-connection.on('error', (err) => err);
+connection.on("error", (err) => err);
 
-connection.once('open', async () => {
-  console.log('connected');
+connection.once("open", async () => {
+  console.log("connected");
 
-  // Drop existing courses
-  await Course.deleteMany({});
+  // Drop existing reactions
+  await Reaction.deleteMany({});
 
-  // Drop existing students
-  await Student.deleteMany({});
+  // Drop existing Thoughts
+  await Thought.deleteMany({});
 
-  // Create empty array to hold the students
-  const students = [];
+  // Drop existing users
+  await User.deleteMany({});
 
-  // Loop 20 times -- add students to the students array
+  // Create empty array to hold the users
+  const users = [];
+  const usednames = [];
+  const friends = [];
+
+  // Loop 20 times -- add users to the friends array
   for (let i = 0; i < 20; i++) {
     // Get some random assignment objects using a helper function that we imported from ./data
-    const assignments = getRandomAssignments(20);
+    // const friends = getRandomName(20);
+    let username = getRandomName();
+    if (usednames.includes(username)) {
+      const num = Math.floor(Math.random() * 90 + 10);
+      username = username + num;
+      usednames.push({ username });
+    }
+    const email = `${username}@gmail.com`;
 
-    const fullName = getRandomName();
-    const first = fullName.split(' ')[0];
-    const last = fullName.split(' ')[1];
-    const github = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
-
-    students.push({
-      first,
-      last,
-      github,
-      assignments,
+    users.push({
+      username,
+      email,
+      // thoughts,
+      friends,
     });
+    usednames.push(username);
   }
+  console.log("precreation", users);
+  // Add users to the collection and await the results
+  await User.collection.insertMany(users);
 
-  // Add students to the collection and await the results
-  await Student.collection.insertMany(students);
+  // const createdUsers = User.collection.find();
+  // .then(async (users) => {
+  //   const userObj = {
+  //     users,
+  //   };
+  //   return res.json(userObj);
+  // })
+  // .catch((err) => {
+  //   console.log(err);
+  //   return res.status(500).json(err);
+  // });
+  console.log("postcreation", users);
+  for (let i = 0; i < users.length; i++) {
+    console.log("making friend");
+    const friend = users[i];
+    const friendid = friend._id.toString();
+    console.log("friendid", friendid);
 
-  // Add courses to the collection and await the results
-  await Course.collection.insertOne({
-    courseName: 'UCLA',
+    // console.log("friend", friend);
+    const newfriends = [];
+    for (let i = 0; i < 6; i++) {
+      const newFriendObject = getRandomArrItem(users, 5);
+      // console.log("newFriendObject", newFriendObject);
+      const newFriendId = newFriendObject._id;
+      // console.log("newFriendId", newFriendId);
+      const newfriend = newFriendId.toString();
+      // console.log(newfriend);
+      newfriends.push({ _id: newfriend });
+    }
+    // console.log(newfriends);
+    // await User.collection.update(
+    //   { _id: friendid },
+    //   {
+    //     $set: {
+    //       friends: newfriends,
+    //     },
+    //   }
+    // );
+    users[i].friends = newfriends;
+    const filter = { _id: users[i]._id };
+    const update = { friends: newfriends };
+    await User.findOneAndUpdate(filter, update);
+  }
+  // Add reactions to the collection and await the results
+  await Reaction.collection.insertOne({
+    reactionName: "UCLA",
     inPerson: false,
-    students: [...students],
+    users: [...users],
   });
 
   // Log out the seed data to indicate what should appear in the database
-  console.table(students);
-  console.info('Seeding complete! 🌱');
+  console.table(users);
+  console.info("Seeding complete! 🌱");
   process.exit(0);
 });
