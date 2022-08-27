@@ -1,4 +1,3 @@
-const { ObjectId } = require("mongoose").Types;
 const { Thought, User } = require("../models");
 
 module.exports = {
@@ -32,7 +31,6 @@ module.exports = {
       });
   },
   // create a new thought
-  // ADD THOUGHT TO USER
   createThought(req, res) {
     Thought.create(req.body)
       .then((thought) =>
@@ -75,7 +73,6 @@ module.exports = {
   // Add an reaction to a thought
   addReaction(req, res) {
     console.log("You are adding a reaction");
-    console.log(req.body);
     Thought.findOneAndUpdate(
       { _id: req.params.thoughtId },
       { $addToSet: { reactions: req.body } },
@@ -94,7 +91,7 @@ module.exports = {
   deleteReaction(req, res) {
     Thought.findOneAndUpdate(
       { _id: req.params.thoughtId },
-      { $pull: { reaction: { reactionId: req.params.reactionId } } },
+      { $pull: { reactions: req.body } },
       { runValidators: true, new: true }
     )
       .then((thought) =>
