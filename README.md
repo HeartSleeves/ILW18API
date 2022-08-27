@@ -12,6 +12,10 @@ Endpoints and controllers for a social networking application utilizing Mongoose
 - [Credits](#credits)
 - [License](#license)
 
+## Video
+
+[Video](https://drive.google.com/file/d/14SKy0Hj2iJk0KSIQ3J9I3Fs4zcJ8lBWz/view)
+
 ## Installation
 
 Installation is not required
