@@ -78,8 +78,13 @@ module.exports = {
         (user) =>
           !user
             ? res.status(404).json({ message: "No such user exists" })
-            : res.json({ message: "User deleted" })
-        // Thought.remove({ username: req.params.username })
+            : res.json({ message: "User deleted" }),
+        Thought.deleteMany({ username: req.params.username }),
+        User.findOneAndUpdate(
+          { _id: req.params.userId },
+          { $pull: { friends: req.params.friendId } },
+          { runValidators: true, new: true }
+        )
       )
       .catch((err) => {
         console.log(err);
